@@ -1,1 +1,1 @@
-La Plicacion inicia con (/register y /login)
+Inicia con (/register y /login)
