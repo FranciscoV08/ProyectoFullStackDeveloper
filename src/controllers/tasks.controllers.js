@@ -23,9 +23,14 @@ export const createTask = async (req, res) => {
 }
 
 export const getTask = async (req, res) => {
-    const task = await Task.findById(req.params.id).populate('user'); 
-    if(!task ) return res.status(404).json({"message" : 'Tarea no encontrada'})
-    res.json(task)
+    try {        
+        const task = await Task.findById(req.params.id).populate('user'); 
+        if(!task ) return res.status(404).json({"message" : 'Tarea no encontrada'})
+        res.json(task)
+    } catch (error) {
+        res.status(400).json({message: "Task Not found"})
+        // console.log(error)
+    }
 }
 
 export const deletTask = async (req, res) => {
@@ -42,3 +47,4 @@ export const updateTask = async (req, res) => {
     if(!task ) return res.status(404).json({"message" : 'Tarea no encontrada'})
     res.json(task)
 }
+// Tengo que hacer el trycatch

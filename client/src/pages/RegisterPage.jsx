@@ -20,6 +20,7 @@ export const RegisterPage = () => {
     if (isAutenticate) navigate("/tasks");
   }, [isAutenticate]);
 
+
   const onSubmit = handleSubmit(async (value) => {
     signup(value);
     // console.log(usuario);

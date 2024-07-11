@@ -1,57 +1,65 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { RegisterPage} from './pages/RegisterPage'
-import { LoginPage } from './pages/LoginPage'
-import { AuthProvider } from './context/AuthContext'
-import { HomePage } from './pages/HomePage'
-import { TasksFormPage } from './pages/TasksFormPage'
-import { TasksPage } from './pages/TasksPage'
-import { ProfilePages } from './pages/ProfilePages'
-import { ProtectecRoutes } from './ProtectecRoutes'
+import { RegisterPage } from "./pages/RegisterPage";
+import { LoginPage } from "./pages/LoginPage";
+import { AuthProvider } from "./context/AuthContext";
+import { HomePage } from "./pages/HomePage";
+import { TasksFormPage } from "./pages/TasksFormPage";
+import { TasksPage } from "./pages/TasksPage";
+import { ProfilePages } from "./pages/ProfilePages";
+import ProtectedRoutes from "./ProtectedRoutes";
+import { TaskProvider } from "./context/TasksContext";
+import { Navbar } from "./components/Navbar";
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <HomePage />
+    path: "",
+    element: <Navbar />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
+      },
+      // Paths Protegidas
+    
+      {
+        path: "/tasks",
+        element: <ProtectedRoutes element={<TasksPage />} />,
+      },
+      {
+        path: "/add-task",
+        element: <ProtectedRoutes element={<TasksFormPage />} />,
+      },
+      {
+        path: "/tasks/:id",
+        element: <ProtectedRoutes element={<TasksFormPage />} />,
+      },
+      {
+        path: "/profile",
+        element: <ProtectedRoutes element={<ProfilePages />} />,
+      },
+    ],
   },
-  {
-    path: "/login",
-    element: <LoginPage />
-  },
-  {
-    path: "/register",
-    element: <RegisterPage />
-  },
-  {
-    path: "/tasks",
-    element: <ProtectecRoutes elememt={<TasksPage />} />
-  },
-  {
-    path: "/add-task",
-    element: <ProtectecRoutes elememt={<TasksFormPage />} />
-  },
-  {
-    path: "/task:id",
-    element: <ProtectecRoutes element={<TasksFormPage />} />
-  },
-  {
-    path: "/profile",
-    element: <ProtectecRoutes elememt={<ProfilePages />} /> 
-  },
-])
-// Renderizamos la aplicación en el elemento con id 'root'
-ReactDOM.createRoot(document.getElementById('root')).render(
-  // StrictMode es una herramienta para destacar problemas potenciales en la aplicación
+]);
+
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    {/* Proveedor de contexto de autenticación que envuelve la aplicación */}
     <AuthProvider>
-      {/* Proveedor de enrutador que envuelve la aplicación */}
-      <RouterProvider router={router} />
+      <TaskProvider>
+        <RouterProvider router={router} />
+      </TaskProvider>
     </AuthProvider>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

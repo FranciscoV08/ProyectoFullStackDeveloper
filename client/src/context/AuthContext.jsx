@@ -1,12 +1,15 @@
 // Importamos los módulos necesarios de React
 import { createContext, useState, useContext, useEffect } from "react";
 // Importamos la función que se encargará de hacer la petición al backend
-import { loginRequest, registerRequest, verifiTokenReques } from "../api/auth.js";
-// Paquete para leer las cookie 
+import {
+  loginRequest,
+  registerRequest,
+  verifiTokenReques,
+} from "../api/auth.js";
+// Paquete para leer las cookie
 import Cookies from "js-cookie";
 // Creamos el contexto de autenticación
 export const AuthContext = createContext();
-
 
 // Hook personalizado para usar el contexto de autenticación
 export const useAuth = () => {
@@ -25,6 +28,8 @@ export const AuthProvider = ({ children }) => {
   const [usuario, setUsuario] = useState(null);
   const [isAutenticate, setisAutenticate] = useState(false);
   const [error, setError] = useState([]);
+  const [isloading, setIsloading] = useState(true);
+
 
   // Función para registrar un usuario
   const signup = async (user) => {
@@ -38,59 +43,75 @@ export const AuthProvider = ({ children }) => {
 
       console.log(res.data);
     } catch (error) {
-        setError(error.response.data.error);
-
+      setError(error.response.data.error);
     }
   };
 
+  //Login
   const signin = async (user) => {
     try {
       const res = await loginRequest(user);
       setisAutenticate(true);
-      setUsuario(res.data)
+      setUsuario(res.data);
       // console.log(res)
-
     } catch (error) {
-      console.log(error)
-      if(Array.isArray(error.response.data)){
-        console.log(error)
-       return setError(error.response.data.error);
+      //
+      console.log(error);
+      if (Array.isArray(error.response.data)) {
+        // console.log(error);
+        return setError(error.response.data.error);
       }
-      setError([error.response.data.message])
+      setError([error.response.data.message]);
     }
   };
 
+  const logout = () => {
+    Cookies.remove("token")
+    setisAutenticate(false)
+    setUsuario(null)
+  }
+
+  //Desaparece los errores
   useEffect(() => {
-    if(error.length > 0){
-        setTimeout(() => {
-            setError([])
-        }, 3000);
+    if (error.length > 0) {
+      setTimeout(() => {
+        setError([]);
+      }, 3000);
     }
-  }, [error])
+  }, [error]);
 
   // Consultando la cookie
   useEffect(() => {
-    const checkLogin = () => {
-      const cookies = Cookies.get()
-    if(cookies.token){
-      try {
-        const res = verifiTokenReques(cookies.token)
-        console.log(res)
-        if(!res.data) setisAutenticate(false)
-
-        setisAutenticate(true)
-        setUsuario(res.data)
-      } catch (error) {
-        setError(false)
-        setUsuario(null)
+    const checkLogin = async () => {
+      const cookies = Cookies.get();
+      //Si el token no existe entonces cambiame mis estados
+      if (!cookies.token) {
+        setIsloading(false);
+        return setUsuario(null);
       }
-    }
-    checkLogin()
-    }
-    
-  }, [])
-  
-  
+      // SI existe mis datos quiero que verifiques el token
+      try {
+        // pide los datos
+        const res = await verifiTokenReques(cookies.token);
+        //En caso de tener token pero no esta en la DB 
+        if (!res.data) {
+          setisAutenticate(false);
+          setIsloading(false);
+          return;
+        }
+// En caso de que tenga los datos verificados del db . Esto va de la mano con mi protectedRouter.jsx
+        setIsloading(false);
+        setisAutenticate(true);
+        setUsuario(res.data);
+
+      } catch (error) {
+        setIsloading(false);
+        setUsuario(null);
+      }
+    };
+    checkLogin();
+  }, []);
+
   return (
     // Proveedor del contexto de autenticación
     <AuthContext.Provider
@@ -100,7 +121,9 @@ export const AuthProvider = ({ children }) => {
         usuario, // Información del usuario
         isAutenticate, //Para saber si el usuario esta autenticado
         error,
-        signin
+        signin,
+        isloading,
+        logout
       }}
     >
       {/* Renderizamos los componentes hijos */}

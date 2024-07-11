@@ -115,7 +115,8 @@ export const profile = async (req, res) => {
 // verify
 export const verifyToken = async (req, res) => {
   // Extraigo cookie de la request 
-  const {token} = req.cookie
+  // console.log(req.cookie)
+  const {token} = req.cookies
   if(!token) return res.status(401).json({message: " Token no autorizado"})
 
   jwt.verify( token, TOKEN_SECRET, async (err, user) => {
